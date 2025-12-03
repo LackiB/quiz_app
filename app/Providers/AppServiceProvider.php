@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Tutaj nie dodawaliśmy żadnego kodu w naszym projekcie.
+        // Domyślnie ten blok jest często pusty lub zawiera minimalne ustawienia.
     }
 }

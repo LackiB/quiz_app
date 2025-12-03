@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
                 
                 <h3 class="text-2xl font-bold mb-6 text-gray-900">
-                    Pytanie 1: {{ $question->question_text }}
+                    Pytanie {{ $questionNumber }} z {{ $totalQuestions }}: {{ $question->question_text }}
                 </h3>
 
                 <form method="POST" action="{{ route('quiz.submit') }}">

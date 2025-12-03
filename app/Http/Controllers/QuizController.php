@@ -8,7 +8,7 @@ use Illuminate\View\View;
 use App\Models\Question;
 use App\Models\Answer;
 use Illuminate\Support\Facades\Session; // Konieczny do zarządzania sesją
-
+use App\Models\Result;
 
 class QuizController extends Controller
 {
@@ -18,7 +18,7 @@ class QuizController extends Controller
 
     public function index(): View
     {
-        
+
         $quizzes = Quiz::all(); 
 
         foreach ($quizzes as $quiz) {
@@ -33,16 +33,34 @@ class QuizController extends Controller
 
     public function showQuestion(Quiz $quiz, Question $question): View
     {
-        // Sprawdź, czy pytanie należy do tego quizu
+        // 1. Sprawdź, czy pytanie należy do tego quizu
         if ($question->quiz_id !== $quiz->id) {
-            abort(404); // Pytanie nie pasuje do quizu
+            abort(404);
         }
 
-        // Przekazujemy dane do widoku
+        // 2. OBLICZANIE NUMERU PYTANIA
+        // a) Pobierz listę wszystkich pytań dla tego quizu, posortowanych według ID (jak są wyświetlane)
+        $allQuestions = $quiz->questions()->orderBy('id')->get();
+        
+        // b) Znajdź indeks (pozycję) aktualnego pytania w tej kolekcji
+        // Index jest liczony od 0. Używamy 'id' i $question->id do wyszukania.
+        $questionIndex = $allQuestions->search(function ($item) use ($question) {
+            return $item->id === $question->id;
+        });
+        
+        // c) Numer pytania dla użytkownika (Index + 1)
+        $questionNumber = $questionIndex !== false ? $questionIndex + 1 : 1;
+        
+        // d) Całkowita liczba pytań
+        $totalQuestions = $allQuestions->count();
+
+        // 3. Przekazanie nowych zmiennych do widoku
         return view('quiz.question', [
             'quiz' => $quiz,
             'question' => $question,
-            'answers' => $question->answers->shuffle(), // Losowa kolejność odpowiedzi
+            'answers' => $question->answers->shuffle(),
+            'questionNumber' => $questionNumber,     // NOWA ZMIENNA
+            'totalQuestions' => $totalQuestions,     // NOWA ZMIENNA
         ]);
     }
 
@@ -131,17 +149,36 @@ class QuizController extends Controller
             return redirect()->route('quiz.results', ['quiz' => $quizId]);
         }
     }
+
     public function showResults(Quiz $quiz): View
     {
+        // 1. POBIERANIE DANYCH Z SESJI
         $quizProgress = Session::get('quiz_progress.' . $quiz->id, ['score' => 0, 'answered_questions' => []]);
         $totalQuestions = $quiz->questions()->count();
+        $userScore = $quizProgress['score'];
 
-        // Opcjonalnie: usuń dane quizu z sesji po wyświetleniu wyników
+        // 2. ZAPIS WYNIKU DO BAZY DANYCH (Temat 7)
+        if (auth()->check()) { // Sprawdź, czy użytkownik jest zalogowany (Temat 8)
+            
+            // Zapisz wynik, jeśli rekord dla tego użytkownika i quizu jeszcze nie istnieje
+            // lub jeśli chcemy zapisywać wiele wyników, po prostu użyjemy create:
+            Result::create([
+                'user_id' => auth()->id(),
+                'quiz_id' => $quiz->id,
+                'score' => $userScore,
+                'total_questions' => $totalQuestions,
+            ]);
+            
+            // Opcjonalnie: możemy dodać logikę, by zapisywać tylko najwyższy wynik!
+        }
+        
+        // 3. USUNIĘCIE SESJI
         Session::forget('quiz_progress.' . $quiz->id);
 
+        // 4. WYŚWIETLENIE WYNIKÓW
         return view('quiz.results', [
             'quiz' => $quiz,
-            'score' => $quizProgress['score'],
+            'score' => $userScore,
             'total' => $totalQuestions,
         ]);
     }

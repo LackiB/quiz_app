@@ -17,10 +17,11 @@
                         
                         <div class="space-y-4">
                             @foreach($quizzes as $quiz)
-                                <a href="#" class="block p-4 border rounded-lg hover:bg-gray-50 transition duration-150 ease-in-out">
+                                <a href="{{ route('quiz.start', ['quiz' => $quiz->id]) }}" 
+                                    class="block p-4 border rounded-lg hover:bg-gray-50 transition duration-150 ease-in-out">
                                     <h4 class="text-xl font-bold text-indigo-600">{{ $quiz->title }}</h4>
                                     <p class="text-sm text-gray-600 mt-1">{{ $quiz->description }}</p>
-                                    <span class="mt-2 inline-block text-xs font-semibold text-white bg-green-500 px-3 py-1 rounded-full">Start</span>
+                                    <span class="mt-2 inline-block text-xs font-semibold text-white bg-indigo-500 px-3 py-1 rounded-full">Rozpocznij Quiz</span>
                                 </a>
                             @endforeach
                         </div>

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Quiz;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+
 
 class QuizSeeder extends Seeder
 {
@@ -13,20 +13,35 @@ class QuizSeeder extends Seeder
      */
     public function run(): void
     {
-        // Dodajemy przykładowe quizy
-        Quiz::create([
+        // 1. Tworzenie pierwszego quizu
+        $quizLaravel = Quiz::create([
             'title' => 'Podstawy Laravela i MVC',
             'description' => 'Quiz sprawdzający wiedzę z zakresu routingu i modeli.',
         ]);
 
-        Quiz::create([
-            'title' => 'HTML & CSS dla początkujących',
-            'description' => 'Quiz dotyczący budowy i stylizacji stron internetowych.',
+        // 2. Dodawanie pytań i odpowiedzi do quizu Laravel
+        $question1 = $quizLaravel->questions()->create([
+            'question_text' => 'Co oznacza skrót MVC?',
         ]);
 
-        Quiz::create([
-            'title' => 'Quiz o JavaScript',
-            'description' => 'Sprawdź swoją znajomość JavaScript.',
+        $question1->answers()->createMany([
+            ['answer_text' => 'Model View Controller', 'is_correct' => true],
+            ['answer_text' => 'Module View Component', 'is_correct' => false],
+            ['answer_text' => 'Main Virtual Client', 'is_correct' => false],
         ]);
+
+        $question2 = $quizLaravel->questions()->create([
+            'question_text' => 'Który plik w Laravelu służy do definiowania tras webowych?',
+        ]);
+
+        $question2->answers()->createMany([
+            ['answer_text' => 'routes/api.php', 'is_correct' => false],
+            ['answer_text' => 'routes/web.php', 'is_correct' => true],
+            ['answer_text' => 'config/app.php', 'is_correct' => false],
+        ]);
+        
+        // Możesz dodać więcej quizów, jak wcześniej
+        Quiz::create(['title' => 'HTML & CSS dla początkujących', 'description' => '...']);
+        Quiz::create(['title' => 'Quiz o JavaScript', 'description' => '...']);
     }
 }

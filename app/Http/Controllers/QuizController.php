@@ -21,4 +21,24 @@ class QuizController extends Controller
             'quizzes' => $quizzes,
         ]);
     }
+
+    public function showQuestion(Quiz $quiz)
+    {
+        // Pobieramy pierwsze pytanie quizu z relacji
+        // Używamy first() aby wziąć tylko jeden rekord
+        $question = $quiz->questions()->first();
+
+        // Jeżeli quiz nie ma pytań (co nie powinno się zdarzyć, ale to dobra praktyka)
+        if (!$question) {
+            return redirect()->route('dashboard')->with('error', 'Ten quiz nie zawiera pytań.');
+        }
+
+        // Przekazujemy quiz i pierwsze pytanie do widoku
+        return view('quiz.question', [
+            'quiz' => $quiz,
+            'question' => $question,
+            // Opcjonalnie: pobieramy odpowiedzi pytania, by je wyświetlić
+            'answers' => $question->answers,
+        ]);
+    }
 }

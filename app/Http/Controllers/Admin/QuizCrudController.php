@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Admin; // Prawidłowa przestrzeń nazw
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Quiz; // Import modelu Quiz
+use App\Models\Quiz;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-// !!! USUNĄŁEM: use App\Http\Controllers\Admin; !!!
+use Illuminate\Http\RedirectResponse;
 
 class QuizCrudController extends Controller
 {
+    // ... (metody index, create, store, edit, update, destroy dla QUIZU)
+    
     /**
      * Wyświetla listę quizów do zarządzania.
      */
@@ -30,9 +32,8 @@ class QuizCrudController extends Controller
     /**
      * Zapisuje nowy quiz w bazie danych (POST).
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        // Walidacja (Temat 6)
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -43,20 +44,19 @@ class QuizCrudController extends Controller
         return redirect()->route('admin.quizzes.index')->with('success', 'Quiz został pomyślnie utworzony!');
     }
 
-    // Dodajmy brakujące metody CRUD, by nie było kolejnych błędów
-    
     /**
      * Pokazuje formularz do edycji quizu.
      */
     public function edit(Quiz $quiz): View
     {
+        $quiz->loadCount('questions'); 
         return view('admin.quizzes.edit', compact('quiz'));
     }
 
     /**
      * Aktualizuje quiz w bazie danych (PUT/PATCH).
      */
-    public function update(Request $request, Quiz $quiz)
+    public function update(Request $request, Quiz $quiz): RedirectResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -71,7 +71,7 @@ class QuizCrudController extends Controller
     /**
      * Usuwa quiz (DELETE).
      */
-    public function destroy(Quiz $quiz)
+    public function destroy(Quiz $quiz): RedirectResponse
     {
         $quiz->delete();
 

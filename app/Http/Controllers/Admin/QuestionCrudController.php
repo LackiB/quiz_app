@@ -91,8 +91,99 @@ class QuestionCrudController extends Controller
         }
     }
     
-    // Na razie pomijamy show, edit, update, destroy – są podobne, ale bardziej złożone
-    // z uwagi na konieczność modyfikacji odpowiedzi.
-    
-    // ... pozostałe metody CRUD ...
+    /**
+     * Wyświetla formularz do edycji pytania.
+     * Używamy Route Model Binding dla Quiz i Question.
+     */
+    public function edit(Quiz $quiz, Question $question): View
+    {
+        // Sprawdź, czy pytanie należy do tego quizu
+        if ($question->quiz_id !== $quiz->id) {
+            abort(404);
+        }
+        
+        // Załaduj odpowiedzi pytania, by wyświetlić je w formularzu
+        $question->load('answers');
+
+        // Ustal, który indeks odpowiedzi jest poprawny
+        $correctAnswerIndex = $question->answers->search(function ($answer) {
+            return $answer->is_correct;
+        });
+
+        return view('admin.questions.edit', [
+            'quiz' => $quiz,
+            'question' => $question,
+            'correctAnswerIndex' => $correctAnswerIndex !== false ? $correctAnswerIndex : 0,
+        ]);
+    }
+
+    /**
+     * Aktualizuje pytanie i jego odpowiedzi.
+     */
+    public function update(Request $request, Quiz $quiz, Question $question): RedirectResponse
+    {
+        // 1. Walidacja (jak przy tworzeniu)
+        $validated = $request->validate([
+            'question_text' => 'required|string|min:3',
+            'answers' => 'required|array|min:2', 
+            'answers.*.answer_text' => 'required|string|min:1',
+            'correct_answer_index' => 'required|integer|min:0|max:' . (count($request->answers) - 1),
+        ]);
+        
+        // 2. Transakcja
+        DB::beginTransaction();
+
+        try {
+            // 3. Aktualizacja Pytania
+            $question->update(['question_text' => $validated['question_text']]);
+
+            // 4. Aktualizacja Odpowiedzi
+            $currentAnswers = $question->answers;
+            
+            foreach ($validated['answers'] as $index => $answerData) {
+                $isCorrect = ($index == $validated['correct_answer_index']);
+                
+                // Użyj istniejącej odpowiedzi na podstawie indeksu lub utwórz nową, jeśli dodano pola
+                if (isset($currentAnswers[$index])) {
+                    $currentAnswers[$index]->update([
+                        'answer_text' => $answerData['answer_text'],
+                        'is_correct' => $isCorrect,
+                    ]);
+                } else {
+                    // Jeśli chcemy, by formularz dodawał nowe odpowiedzi, musimy je tutaj utworzyć.
+                    // Na razie zakładamy stałą liczbę 4 odpowiedzi.
+                }
+            }
+            
+            DB::commit();
+
+            return redirect()
+                ->route('admin.quizzes.questions.index', $quiz)
+                ->with('success', 'Pytanie zostało pomyślnie zaktualizowane!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Wystąpił błąd podczas aktualizacji pytania.');
+        }
+    }
+
+    /**
+     * Usuwa pytanie i wszystkie jego odpowiedzi (dzięki onDelete('cascade') w migracji).
+     */
+    public function destroy(Quiz $quiz, Question $question): RedirectResponse
+    {
+        // Sprawdzenie przynależności jest zawsze dobrą praktyką
+        if ($question->quiz_id !== $quiz->id) {
+            abort(404);
+        }
+        
+        $question->delete();
+
+        return redirect()
+            ->route('admin.quizzes.questions.index', $quiz)
+            ->with('success', 'Pytanie zostało pomyślnie usunięte.');
+    }
 }

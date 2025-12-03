@@ -3,11 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuizController; 
-use App\Http\Controllers\Admin;
+use App\Http\Controllers\Admin; // Import dla kontrolerów Admin
 
-// ... (pozostałe trasy, np. domyślna '/' i trasy uwierzytelniania)
-
-// Trasa domyślna - po instalacji Breeze kieruje do dashboard
+// Trasa domyślna - po instalacji Breeze kieruje do welcome
 Route::get('/', function () {
     return view('welcome');
 });
@@ -17,13 +15,9 @@ Route::middleware('auth')->group(function () {
     // Zmieniamy domyślną trasę 'dashboard', aby pokazywała listę quizów
     Route::get('/dashboard', [QuizController::class, 'index'])->name('dashboard'); 
 
-    // NOWA TRASA: Uruchomienie quizu
-    // Używamy parametru {quiz}, który zostanie przekazany do kontrolera
+    // FRONT-END QUIZU
     Route::get('/quiz/{quiz}/q/{question}', [QuizController::class, 'showQuestion'])->name('quiz.show_next');
-    
-    // NOWA TRASA: Obsługa odpowiedzi (POST)
     Route::post('/quiz/submit', [QuizController::class, 'submitAnswer'])->name('quiz.submit');
-
     Route::get('/quiz/{quiz}/results', [QuizController::class, 'showResults'])->name('quiz.results');
 
     // Trasa do profilu
@@ -32,14 +26,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// BLOK TRAS ADMINA (BACK-END)
 Route::middleware(['auth', 'can:access-admin'])->prefix('admin')->name('admin.')->group(function () {
     
+    // TRASA GŁÓWNA ADMINA: /admin (nazwa: admin.dashboard)
     Route::get('/', function () {
         return view('admin.dashboard'); 
-    })->name('dashboard'); // <--- Sprawdź, czy to jest
+    })->name('dashboard'); 
 
-    Route::resource('quizzes', Admin\QuizCrudController::class);
-    // ...
+    // CRUD QUIZÓW: /admin/quizzes
+    Route::resource('quizzes', Admin\QuizCrudController::class); 
+
+    // CRUD PYTAŃ (ZAGNIEŻDŻONY): /admin/quizzes/{quiz}/questions
+    Route::resource('quizzes.questions', Admin\QuestionCrudController::class)->except(['show']);
+    
 });
 
 require __DIR__.'/auth.php';

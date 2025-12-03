@@ -35,9 +35,19 @@
                                 </li>
                             @endforeach
                         </ul>
-                        <div class="mt-4">
-                            {{-- <a href="#" class="text-blue-600 hover:text-blue-900 mr-4">Edytuj</a> --}}
-                            {{-- ... Przycisk Usuń ... --}}
+                        <div class="mt-4 flex space-x-3">
+                            <a href="{{ route('admin.quizzes.questions.edit', ['quiz' => $quiz->id, 'question' => $question->id]) }}" 
+                               class="text-blue-600 hover:text-blue-900 font-semibold">
+                                Edytuj
+                            </a>
+                            
+                            <form action="{{ route('admin.quizzes.questions.destroy', ['quiz' => $quiz->id, 'question' => $question->id]) }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć to pytanie? Pamiętaj, że usunięcie pytania jest nieodwracalne.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">
+                                    Usuń
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach

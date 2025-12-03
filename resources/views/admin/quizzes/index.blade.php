@@ -29,7 +29,23 @@
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $quiz->title }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edytuj</a>
-                                    </td>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+    <div class="flex items-center space-x-4">
+        
+        <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="text-indigo-600 hover:text-indigo-900">
+            Edytuj
+        </a>
+
+        <form action="{{ route('admin.quizzes.destroy', $quiz) }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć ten quiz i WSZYSTKIE POWIĄZANE PYTANIA/WYNIKI?');">
+            @csrf
+            @method('DELETE') <button type="submit" class="text-red-600 hover:text-red-900">
+                Usuń
+            </button>
+        </form>
+
+    </div>
+</td>
                             </tr>
                         @endforeach
                     </tbody>

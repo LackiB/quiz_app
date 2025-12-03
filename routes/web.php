@@ -18,10 +18,12 @@ Route::middleware('auth')->group(function () {
 
     // NOWA TRASA: Uruchomienie quizu
     // Używamy parametru {quiz}, który zostanie przekazany do kontrolera
-    Route::get('/quiz/{quiz}', [QuizController::class, 'showQuestion'])->name('quiz.start'); 
+    Route::get('/quiz/{quiz}/q/{question}', [QuizController::class, 'showQuestion'])->name('quiz.show_next');
     
     // NOWA TRASA: Obsługa odpowiedzi (POST)
     Route::post('/quiz/submit', [QuizController::class, 'submitAnswer'])->name('quiz.submit');
+
+    Route::get('/quiz/{quiz}/results', [QuizController::class, 'showResults'])->name('quiz.results');
 
     // Trasa do profilu
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

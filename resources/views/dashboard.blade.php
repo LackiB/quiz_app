@@ -17,12 +17,16 @@
                         
                         <div class="space-y-4">
                             @foreach($quizzes as $quiz)
-                                <a href="{{ route('quiz.start', ['quiz' => $quiz->id]) }}" 
-                                    class="block p-4 border rounded-lg hover:bg-gray-50 transition duration-150 ease-in-out">
-                                    <h4 class="text-xl font-bold text-indigo-600">{{ $quiz->title }}</h4>
-                                    <p class="text-sm text-gray-600 mt-1">{{ $quiz->description }}</p>
-                                    <span class="mt-2 inline-block text-xs font-semibold text-white bg-indigo-500 px-3 py-1 rounded-full">Rozpocznij Quiz</span>
-                                </a>
+                                @if ($quiz->first_question_id)
+                                        <a href="{{ route('quiz.show_next', ['quiz' => $quiz->id, 'question' => $quiz->first_question_id]) }}" 
+                                            class="block p-4 border rounded-lg hover:bg-gray-50 transition duration-150 ease-in-out">
+                                        <h4 class="text-xl font-bold text-indigo-600">{{ $quiz->title }}</h4> 
+                                        <p class="text-sm text-gray-600 mt-1">{{ $quiz->description }}</p>
+                                        <span class="mt-2 inline-block text-xs font-semibold text-white bg-indigo-500 px-3 py-1 rounded-full">Rozpocznij Quiz</span>
+                                    </a>
+                                @else
+                                    <p>Quiz tymczasowo niedostępny.</p>
+                                @endif
                             @endforeach
                         </div>
                     @endif

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin', // DODAJ
     ];
 
     /**
@@ -45,7 +46,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    
+
     public function results(): HasMany
     {
         return $this->hasMany(Result::class);

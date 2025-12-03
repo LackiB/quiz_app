@@ -18,6 +18,34 @@
                 </div>
             </div>
 
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+        {{ __('Quizy') }}
+    </x-nav-link>
+
+    {{-- DODANY BLOK DLA ADMINISTRATORA --}}
+    @can('access-admin')
+        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+            {{ __('Edytor Quizów') }}
+        </x-nav-link>
+    @endcan
+</div>
+
+<div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div class="pt-2 pb-3 space-y-1">
+        <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            {{ __('Quizy') }}
+        </x-responsive-nav-link>
+
+        {{-- DODANY BLOK DLA ADMINISTRATORA W WERSJI MOBILNEJ --}}
+        @can('access-admin')
+            <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                {{ __('Edytor Quizów') }}
+            </x-responsive-nav-link>
+        @endcan
+    </div>
+    </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">

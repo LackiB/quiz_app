@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\QuizController; // Dodaj użycie kontrolera
+use App\Http\Controllers\QuizController; 
+use App\Http\Controllers\Admin;
 
 // ... (pozostałe trasy, np. domyślna '/' i trasy uwierzytelniania)
 
@@ -29,6 +30,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'can:access-admin'])->prefix('admin')->name('admin.')->group(function () {
+    
+    Route::get('/', function () {
+        return view('admin.dashboard'); 
+    })->name('dashboard'); // <--- Sprawdź, czy to jest
+
+    Route::resource('quizzes', Admin\QuizCrudController::class);
+    // ...
 });
 
 require __DIR__.'/auth.php';

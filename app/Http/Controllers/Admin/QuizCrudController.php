@@ -12,18 +12,13 @@ class QuizCrudController extends Controller
 {
     // ... (metody index, create, store, edit, update, destroy dla QUIZU)
     
-    /**
-     * Wyświetla listę quizów do zarządzania.
-     */
     public function index(): View
     {
         $quizzes = Quiz::orderBy('id', 'desc')->get();
         return view('admin.quizzes.index', compact('quizzes'));
     }
 
-    /**
-     * Pokazuje formularz do tworzenia nowego quizu.
-     */
+
     public function create(): View
     {
         return view('admin.quizzes.create');
@@ -44,9 +39,7 @@ class QuizCrudController extends Controller
         return redirect()->route('admin.quizzes.index')->with('success', 'Quiz został pomyślnie utworzony!');
     }
 
-    /**
-     * Pokazuje formularz do edycji quizu.
-     */
+  
     public function edit(Quiz $quiz): View
     {
         $quiz->loadCount('questions'); 
@@ -68,9 +61,7 @@ class QuizCrudController extends Controller
         return redirect()->route('admin.quizzes.index')->with('success', 'Quiz zaktualizowany.');
     }
 
-    /**
-     * Usuwa quiz (DELETE).
-     */
+   
     public function destroy(Quiz $quiz): RedirectResponse
     {
         $quiz->delete();

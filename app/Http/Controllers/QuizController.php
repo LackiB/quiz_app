@@ -68,42 +68,41 @@ class QuizController extends Controller
     
     public function submitAnswer(Request $request)
     {
-        // 1. WALIDACJA DANYCH (Temat 6)
-        // Sprawdzamy, czy użytkownik wybrał odpowiedź (answer_id)
+
+        // Sprawdza, czy użytkownik wybrał odpowiedź (answer_id)
         $validated = $request->validate([
-            'quiz_id' => 'required|exists:quizzes,id', // Upewnij się, że quiz_id istnieje
-            'question_id' => 'required|exists:questions,id', // Upewnij się, że question_id istnieje
-            'answer_id' => 'required|exists:answers,id', // Odpowiedź jest wymagana i musi istnieć
+            'quiz_id' => 'required|exists:quizzes,id', 
+            'question_id' => 'required|exists:questions,id', 
+            'answer_id' => 'required|exists:answers,id', 
         ]);
 
         $currentQuizId = $validated['quiz_id'];
         $currentQuestionId = $validated['question_id'];
         $submittedAnswerId = $validated['answer_id'];
 
-        // 2. LOGIKA SPRAWDZANIA POPRAWNOŚCI
         
-        // Znajdź poprawną odpowiedź i sprawdzamy, czy przesłana odpowiedź jest poprawna
+        
+        
         $correctAnswer = Answer::where('question_id', $currentQuestionId)
                                ->where('is_correct', true)
                                ->firstOrFail();
 
         $isCorrect = ($submittedAnswerId == $correctAnswer->id);
 
-        // 3. ZARZĄDZANIE SESJĄ (Śledzenie wyników)
 
-        // Pobierz aktualny stan quizu z sesji lub utwórz nowy
+        // Pobiera aktualny stan quizu z sesji lub utwórz nowy
         $quizProgress = Session::get('quiz_progress.' . $currentQuizId, [
             'score' => 0, 
             'answered_questions' => [], 
             'last_question_id' => 0
         ]);
         
-        // Zabezpieczenie: jeśli na to pytanie już odpowiedzieliśmy, ignorujemy to żądanie
+        
         if (in_array($currentQuestionId, $quizProgress['answered_questions'])) {
              return $this->redirectToNextQuestion($currentQuizId);
         }
 
-        // Aktualizacja stanu:
+        
         if ($isCorrect) {
             $quizProgress['score']++;
         }
@@ -111,10 +110,10 @@ class QuizController extends Controller
         $quizProgress['answered_questions'][] = $currentQuestionId;
         $quizProgress['last_question_id'] = $currentQuestionId;
 
-        // Zapisz zaktualizowany stan w sesji
+       
         Session::put('quiz_progress.' . $currentQuizId, $quizProgress);
 
-        // 4. PRZEKIEROWANIE DO KOLEJNEGO PYTANIA
+        
         return $this->redirectToNextQuestion($currentQuizId);
     }
     
@@ -127,18 +126,14 @@ class QuizController extends Controller
         $quizProgress = Session::get('quiz_progress.' . $quizId);
         $lastQuestionId = $quizProgress['last_question_id'];
 
-        // Znajdź następne pytanie w sekwencji, które NIE zostało jeszcze wyświetlone
+        
         $nextQuestion = $quiz->questions()
                              ->where('id', '>', $lastQuestionId)
                              ->orderBy('id')
                              ->first();
         
         if ($nextQuestion) {
-            // Przekieruj do metody showQuestion() z nowym ID
-            // Uwaga: musimy zmodyfikować showQuestion, by akceptowało questionId lub użyć redirect route.
             
-            // Najprościej: przekieruj do tej samej trasy startowej, ale z nowym ID pytania
-            // To wymaga modyfikacji metody showQuestion (patrz niżej)
             return redirect()->route('quiz.show_next', [
                 'quiz' => $quizId, 
                 'question' => $nextQuestion->id
@@ -152,16 +147,15 @@ class QuizController extends Controller
 
     public function showResults(Quiz $quiz): View
     {
-        // 1. POBIERANIE DANYCH Z SESJI
+        
         $quizProgress = Session::get('quiz_progress.' . $quiz->id, ['score' => 0, 'answered_questions' => []]);
         $totalQuestions = $quiz->questions()->count();
         $userScore = $quizProgress['score'];
 
-        // 2. ZAPIS WYNIKU DO BAZY DANYCH (Temat 7)
-        if (auth()->check()) { // Sprawdź, czy użytkownik jest zalogowany (Temat 8)
+        
+        if (auth()->check()) { 
             
-            // Zapisz wynik, jeśli rekord dla tego użytkownika i quizu jeszcze nie istnieje
-            // lub jeśli chcemy zapisywać wiele wyników, po prostu użyjemy create:
+           
             Result::create([
                 'user_id' => auth()->id(),
                 'quiz_id' => $quiz->id,
@@ -169,13 +163,13 @@ class QuizController extends Controller
                 'total_questions' => $totalQuestions,
             ]);
             
-            // Opcjonalnie: możemy dodać logikę, by zapisywać tylko najwyższy wynik!
+           
         }
         
-        // 3. USUNIĘCIE SESJI
+        // USUNIĘCIE SESJI
         Session::forget('quiz_progress.' . $quiz->id);
 
-        // 4. WYŚWIETLENIE WYNIKÓW
+       
         return view('quiz.results', [
             'quiz' => $quiz,
             'score' => $userScore,

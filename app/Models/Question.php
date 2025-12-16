@@ -13,17 +13,13 @@ class Question extends Model
 
     protected $fillable = ['quiz_id', 'question_text'];
 
-    /**
-     * Pytanie należy do jednego quizu.
-     */
+   
     public function quiz(): BelongsTo
     {
         return $this->belongsTo(Quiz::class);
     }
 
-    /**
-     * Pytanie ma wiele odpowiedzi.
-     */
+   
     public function answers(): HasMany
     {
         return $this->hasMany(Answer::class);

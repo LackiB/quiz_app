@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            // Klucz obcy do tabeli 'users' (Temat 8)
+
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
-            // Klucz obcy do tabeli 'quizzes'
+
             $table->foreignId('quiz_id')->constrained()->onDelete('cascade');
             
-            $table->integer('score'); // Liczba poprawnych odpowiedzi
-            $table->integer('total_questions'); // Całkowita liczba pytań w quizie
+            $table->integer('score'); 
+            $table->integer('total_questions'); 
             
             $table->timestamps();
         });

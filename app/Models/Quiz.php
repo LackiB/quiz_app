@@ -13,9 +13,7 @@ class Quiz extends Model
     // Umożliwia masowe przypisywanie (Mass Assignment) dla tych kolumn
     protected $fillable = ['title', 'description'];
 
-    /**
-     * Quiz ma wiele pytań.
-     */
+    
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class);

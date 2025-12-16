@@ -10,7 +10,6 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            // Klucz obcy: 'quiz_id' odwołujący się do tabeli 'quizzes'
             $table->foreignId('quiz_id')->constrained()->onDelete('cascade');
             $table->text('question_text');
             $table->timestamps();

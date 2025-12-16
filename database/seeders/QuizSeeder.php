@@ -19,7 +19,6 @@ class QuizSeeder extends Seeder
             'description' => 'Quiz sprawdzający wiedzę z zakresu routingu i modeli.',
         ]);
 
-        // 2. Dodawanie pytań i odpowiedzi do quizu Laravel
         $question1 = $quizLaravel->questions()->create([
             'question_text' => 'Co oznacza skrót MVC?',
         ]);
